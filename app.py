@@ -35,7 +35,7 @@ def predict():
       #  base_model.trainable = False
         
         # Predict
-        predictions = base_model.predict(image)
+       # predictions = base_model.predict(image)
         
         # Process predictions here
         # return the top prediction
