@@ -1,6 +1,6 @@
 from flask import Flask, request, render_template
 import tensorflow as tf
-# from model import base_model, IMG_SIZE  # Import your model and any necessary variables
+# from model import base_model, IMG_SIZE  # import out model
 import numpy as np
 from PIL import Image
 import io
@@ -31,17 +31,17 @@ def predict():
         image = Image.open(io.BytesIO(file.read()))
         image = prepare_image(image, IMG_SIZE)
         
-        # Make sure your model is in prediction mode
+        # make sure model is in prediction mode
       #  base_model.trainable = False
         
         # Predict
         predictions = base_model.predict(image)
         
-        # Process your predictions here
-        # For example, you might want to return the top prediction
+        # Process predictions here
+        # return the top prediction
         top_prediction = predictions[0]
         
-        # Return the result as a string (customize as needed)
+        # Return the result as a string
         return str(top_prediction)
 
 if __name__ == '__main__':
