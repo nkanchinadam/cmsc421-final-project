@@ -4,6 +4,7 @@ import shutil
 from PIL import Image
 import numpy as np
 import os
+import json
 
 def get_image(link, imdbId):
     res = requests.get(link, stream=True)
@@ -25,6 +26,9 @@ def main():
         image = get_image(row['Poster'].values[0], imdbId)
         if not np.array_equal(image, np.array([])):
             pixelData[imdbId] = image
+
+    with open('pixelData.json', 'w') as f:
+        json.dump(pixelData, f)
     
 if __name__ == "__main__":
     main()
