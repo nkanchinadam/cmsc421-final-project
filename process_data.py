@@ -12,7 +12,12 @@ def get_image(link, imdbId):
         return np.array([])
     with open('./movies/' + str(imdbId) + '.png', 'wb') as f:
         shutil.copyfileobj(res.raw, f)
-    image = np.asarray(Image.open('./movies/' + str(imdbId) + '.png'))
+    
+    image = None
+    try:
+        image = np.asarray(Image.open('./movies/' + str(imdbId) + '.png'))
+    except:
+        image = np.array([])
     os.remove('./movies/' + str(imdbId) + '.png')
     return image
 
