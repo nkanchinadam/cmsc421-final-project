@@ -10,7 +10,7 @@ def main():
         for genre in genres:
             genre_labels.add(genre)
     genre_labels = sorted(list(genre_labels))
-    with open('genreLabels.json', 'w') as f:
+    with open('./data/genreLabels.json', 'w') as f:
         json.dump(genre_labels, f)
 
 if __name__ == '__main__':
