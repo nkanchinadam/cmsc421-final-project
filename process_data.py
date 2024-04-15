@@ -33,7 +33,10 @@ def main():
 
     pixel_data = {}
     genre_data = {}
+    i = 0
     for imdbId in df['imdbId']:
+        print(i)
+        i += 1
         row = df[df['imdbId'] == imdbId]
         image = get_image(row['Poster'].values[0], imdbId)
         if not np.array_equal(image, np.array([])):
