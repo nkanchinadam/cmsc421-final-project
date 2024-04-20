@@ -7,22 +7,21 @@ import os
 import json
 
 #put your name here, so each file is different
-CSV_FILENAME = 'Nitin'
+CSV_FILENAME = 'MovieGenre'
 
 def get_image(link, imdbId):
     res = requests.get(link, stream=True)
     if res.status_code == 404:
-        return np.array([])
-    with open('./movies/' + str(imdbId) + '.png', 'wb') as f:
+        return False
+    with open('./images/' + str(imdbId) + '.png', 'wb') as f:
         shutil.copyfileobj(res.raw, f)
     
-    image = None
     try:
-        image = np.asarray(Image.open('./movies/' + str(imdbId) + '.png'))
+        np.asarray(Image.open('./images/' + str(imdbId) + '.png'))
+        return True
     except:
-        image = np.array([])
-    os.remove('./movies/' + str(imdbId) + '.png')
-    return image
+        os.remove('./images/' + str(imdbId) + '.png')
+        return False
 
 def main():
     df = pd.read_csv('./movies/' + CSV_FILENAME + '.csv', encoding='ISO-8859-1')
@@ -38,9 +37,7 @@ def main():
         print(i)
         i += 1
         row = df[df['imdbId'] == imdbId]
-        image = get_image(row['Poster'].values[0], imdbId)
-        if not np.array_equal(image, np.array([])):
-            pixel_data[imdbId] = image.tolist()
+        if get_image(row['Poster'].values[0], imdbId):
             movie_genres = row['Genre'].values[0].split('|')
             genre_data[imdbId] = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
 
