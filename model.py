@@ -44,7 +44,7 @@ def main():
   model.add(base_model)
   model.add(Flatten())
   model.add(Dense(28, activation='softmax'))
-  model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+  model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
   print(model.summary())
   model.fit(x=X_train, y=y_train, validation_data=(X_val, y_val), epochs=20, verbose=2)
   
