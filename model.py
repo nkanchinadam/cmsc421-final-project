@@ -17,20 +17,16 @@ BATCH_SIZE = 32
 def main():
   X = []
   y = []
-  shapes = set()
-  for name in ['Nitin']:#, 'Michael', 'Jihyo', 'Jason', 'Cara']:
-    genre_data = json.load(open('./data/genreData' + name + '.json', 'r'))
-    for id in genre_data.keys():
-      image = None
-      try:
-        image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
-        shapes.add(image.shape)
-      except:
-        continue
+  genre_data = json.load(open('./new_data/genreDataMovieGenre.json', 'r'))
+  for id in genre_data.keys():
+    image = None
+    try:
+      image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
+    except:
+      continue
+    X.append(image)
+    y.append(genre_data[id])
 
-      X.append(image)
-      y.append(genre_data[id])
-  print(shapes)
   X = np.array(X)
   y = np.array(y)
 

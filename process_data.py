@@ -9,7 +9,7 @@ import json
 #put your name here, so each file is different
 CSV_FILENAME = 'MovieGenre'
 
-def get_image(link, imdbId):
+def get_image_http(link, imdbId):
     res = requests.get(link, stream=True)
     if res.status_code == 404:
         return False
@@ -23,26 +23,32 @@ def get_image(link, imdbId):
         os.remove('./images/' + str(imdbId) + '.png')
         return False
 
+def get_image_filedir(imdbId):
+    try:
+        Image.open('./images/' + str(imdbId) + '.png')
+        return True
+    except:
+        return False
+
 def main():
     df = pd.read_csv('./movies/' + CSV_FILENAME + '.csv', encoding='ISO-8859-1')
     df = df.dropna()
     df = df.drop_duplicates(subset=['imdbId'])
 
-    genre_labels = json.load(open('./data/genreLabels.json'))
+    genre_labels = json.load(open('./data/filteredGenreLabels.json'))
 
-    pixel_data = {}
     genre_data = {}
     i = 0
     for imdbId in df['imdbId']:
         print(i)
         i += 1
         row = df[df['imdbId'] == imdbId]
-        if get_image(row['Poster'].values[0], imdbId):
+        if get_image_filedir(imdbId):
             movie_genres = row['Genre'].values[0].split('|')
-            genre_data[imdbId] = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
+            label_vector = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
+            if label_vector.count(0.0) != len(genre_labels):
+                genre_data[imdbId] = label_vector
 
-    with open('./data/pixelData' + CSV_FILENAME + '.json', 'w') as f:
-        json.dump(pixel_data, f)
     with open('./data/genreData' + CSV_FILENAME + '.json', 'w') as f:
         json.dump(genre_data, f)
 
