@@ -35,7 +35,7 @@ def main():
     df = df.dropna()
     df = df.drop_duplicates(subset=['imdbId'])
 
-    genre_labels = json.load(open('./data/filteredGenreLabels.json'))
+    genre_labels = json.load(open('./new_data/5GenreLabels.json'))
 
     genre_data = {}
     i = 0
@@ -49,7 +49,7 @@ def main():
             if label_vector.count(0.0) != len(genre_labels):
                 genre_data[imdbId] = label_vector
 
-    with open('./data/genreData' + CSV_FILENAME + '.json', 'w') as f:
+    with open('./new_data/5LabelGenreData.json', 'w') as f:
         json.dump(genre_data, f)
 
 if __name__ == "__main__":
