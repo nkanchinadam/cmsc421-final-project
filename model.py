@@ -57,10 +57,17 @@ def main():
   for i in range(len(y)):
     y_labels.append(np.argmax(y[i],axis=0))
 
-  print(X.shape)
-  print(y.shape)
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, stratify=y)
-  X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1, stratify=y)
+  y_labels = np.array(y_labels)
+  print(X)
+  print(y_labels)
+
+  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, stratify=y_labels)
+  X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1, stratify=y_train)
+
+  print(X_test)
+  print(y_test)
+  print(X_val)
+  print(y_val)
 
   #datagen = ImageDataGenerator(
     #rotation_range=10,
@@ -87,9 +94,9 @@ def main():
   #model.add(Dropout(0.1))
   model.add(Dense(1024, activation='relu'))#, kernel_regularizer=l2(0.001)))
   #model.add(Dropout(0.1))
-  model.add(Dense(512, activation='relu'))#, kernel_regularizer=l2(0.001)))
+  #model.add(Dense(512, activation='relu'))#, kernel_regularizer=l2(0.001)))
   #model.add(Dropout(0.1))
-  model.add(Dense(256, activation='relu'))#, kernel_regularizer=l2(0.1)))
+  #model.add(Dense(256, activation='relu'))#, kernel_regularizer=l2(0.1)))
   #model.add(Dropout(0.1))
   #model.add(Dense(128, activation='relu', kernel_regularizer=l2(0.1)))
   #model.add(Dropout(0.1))
