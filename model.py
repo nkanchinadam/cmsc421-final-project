@@ -70,45 +70,48 @@ def main():
   print(y_val)
 
   # Revert back to original test data
-  new_y_train = np.asarray([])
-  new_y_test = np.asarray([])
-  new_y_val = np.asarray([])
+  new_y_train = np.array([[0,0,0,0,0]])
+  new_y_test = np.array([[0,0,0,0,0]])
+  new_y_val = np.array([[0,0,0,0,0]])
   for data in y_train:
     if data == 0:
-      new_y_train = np.append(new_y_train, np.asarray([1,0,0,0,0]))
+      new_y_train = np.concatenate((new_y_train, np.array([[1,0,0,0,0]])), axis=0)
     elif data == 1:
-      new_y_train = np.append(new_y_train, np.asarray([0,1,0,0,0]))
+      new_y_train = np.concatenate((new_y_train, np.array([[0,1,0,0,0]])), axis=0)
     elif data == 2:
-      new_y_train = np.append(new_y_train, np.asarray([0,0,1,0,0]))
+      new_y_train = np.concatenate((new_y_train, np.array([[0,0,1,0,0]])), axis=0)
     elif data == 3:
-      new_y_train = np.append(new_y_train, np.asarray([0,0,0,1,0]))
+      new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,1,0]])), axis=0)
     else:
-      new_y_train = np.append(new_y_train, np.asarray([0,0,0,0,1]))
+      new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,0,1]])), axis=0)
 
   for data in y_test:
     if data == 0:
-      new_y_test = np.append(new_y_test, np.asarray([1,0,0,0,0]))
+      new_y_test = np.concatenate((new_y_test, np.array([[1,0,0,0,0]])), axis=0)
     elif data == 1:
-      new_y_test = np.append(new_y_test, np.asarray([0,1,0,0,0]))
+      new_y_test = np.concatenate((new_y_test, np.array([[0,1,0,0,0]])), axis=0)
     elif data == 2:
-      new_y_test = np.append(new_y_test, np.asarray([0,0,1,0,0]))
+      new_y_test = np.concatenate((new_y_test, np.array([[0,0,1,0,0]])), axis=0)
     elif data == 3:
-      new_y_test = np.append(new_y_test, np.asarray([0,0,0,1,0]))
+      new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,1,0]])), axis=0)
     else:
-      new_y_test = np.append(new_y_test, np.asarray([0,0,0,0,1]))
+      new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,0,1]])), axis=0)
 
   for data in y_val:
     if data == 0:
-      new_y_val = np.append(new_y_val, np.asarray([1,0,0,0,0]))
+      new_y_val = np.concatenate((new_y_val, np.array([[1,0,0,0,0]])), axis=0)
     elif data == 1:
-      new_y_val = np.append(new_y_val, np.asarray([0,1,0,0,0]))
+      new_y_val = np.concatenate((new_y_val, np.array([[0,1,0,0,0]])), axis=0)
     elif data == 2:
-      new_y_val = np.append(new_y_val, np.asarray([0,0,1,0,0]))
+      new_y_val = np.concatenate((new_y_val, np.array([[0,0,1,0,0]])), axis=0)
     elif data == 3:
-      new_y_val = np.append(new_y_val, np.asarray([0,0,0,1,0]))
+      new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,1,0]])), axis=0)
     else:
-      new_y_val = np.append(new_y_val, np.asarray([0,0,0,0,1]))
+      new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,0,1]])), axis=0)
 
+  new_y_train = new_y_train[1:]
+  new_y_val = new_y_val[1:]
+  new_y_test = new_y_test[1:]
 
   #datagen = ImageDataGenerator(
     #rotation_range=10,
