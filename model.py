@@ -49,7 +49,10 @@ def main():
     count+=1
     if count == 8000:
       break
-  
+
+  X = np.asarray(X)
+  y = np.asarray(y)
+
   y_labels = []
   for i in range(len(y)):
     y_labels.append(np.argmax(y[i],axis=0))
@@ -69,14 +72,42 @@ def main():
   new_y_train = []
   new_y_test = []
   new_y_val = []
-  for data in X_train:
-    new_y_train.append(y[X.index(data)])
-  for data in X_test:
-    new_y_test.append(y[X.index(data)])
-  for data in X_val:
-    new_y_val.append(y[X.index(data)])
+  for data in y_train:
+    if data == 0:
+      new_y_train.append([1,0,0,0,0])
+    elif data == 1:
+      new_y_train.append([0,1,0,0,0])
+    elif data == 0:
+      new_y_train.append([0,0,1,0,0])
+    elif data == 0:
+      new_y_train.append([0,0,0,1,0])
+    else:
+      new_y_train.append([0,0,0,0,1])
 
-  
+  for data in y_test:
+    if data == 0:
+      new_y_test.append([1,0,0,0,0])
+    elif data == 1:
+      new_y_test.append([0,1,0,0,0])
+    elif data == 0:
+      new_y_test.append([0,0,1,0,0])
+    elif data == 0:
+      new_y_test.append([0,0,0,1,0])
+    else:
+      new_y_test.append([0,0,0,0,1])
+
+  for data in y_val:
+    if data == 0:
+      new_y_val.append([1,0,0,0,0])
+    elif data == 1:
+      new_y_val.append([0,1,0,0,0])
+    elif data == 0:
+      new_y_val.append([0,0,1,0,0])
+    elif data == 0:
+      new_y_val.append([0,0,0,1,0])
+    else:
+      new_y_val.append([0,0,0,0,1])
+
 
   #datagen = ImageDataGenerator(
     #rotation_range=10,
