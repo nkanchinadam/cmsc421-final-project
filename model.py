@@ -69,6 +69,18 @@ def main():
   # print(X_val)
   print(y_val)
 
+  # Revert back to original test data
+  new_y_train = []
+  new_y_test = []
+  new_y_val = []
+  for data in X_train:
+    new_y_train.append(np.where((X==data))[0][0])
+  for data in X_test:
+    new_y_test.append(np.where((X==data))[0][0])
+  for data in X_val:
+    new_y_val.append(np.where((X==data))[0][0])
+
+
   #datagen = ImageDataGenerator(
     #rotation_range=10,
     #width_shift_range=0.1,
@@ -114,7 +126,7 @@ def main():
   # Early stopping
   early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
   
-  model.fit(x=X_train, y=y_train, batch_size=BATCH_SIZE, validation_data=(X_val, y_val), epochs=5, verbose=2, callbacks=[early_stopping])
+  model.fit(x=X_train, y=new_y_train, batch_size=BATCH_SIZE, validation_data=(X_val, new_y_val), epochs=5, verbose=2, callbacks=[early_stopping])
   
   
   test_pred = model.predict(X_test)
@@ -123,7 +135,7 @@ def main():
   y_test_label = []
   for i in range(len(test_pred)):
     test_pred_label.append(np.argmax(test_pred[i], axis=0))
-    y_test_label.append(np.argmax(y_test[i], axis=0))
+    y_test_label.append(np.argmax(new_y_test[i], axis=0))
 
   report = classification_report(y_test_label, test_pred_label)
   
