@@ -58,15 +58,15 @@ def main():
     y_labels.append(np.argmax(y[i],axis=0))
 
   y_labels = np.array(y_labels)
-  print(X)
+  # print(X)
   print(y_labels)
 
-  X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1, stratify=y_labels)
+  X_train, X_test, y_train, y_test = train_test_split(X, y_labels, test_size=0.2, random_state=1, stratify=y_labels)
   X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1, stratify=y_train)
 
-  print(X_test)
+  # print(X_test)
   print(y_test)
-  print(X_val)
+  # print(X_val)
   print(y_val)
 
   #datagen = ImageDataGenerator(
