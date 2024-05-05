@@ -77,9 +77,9 @@ def main():
       new_y_train.append([1,0,0,0,0])
     elif data == 1:
       new_y_train.append([0,1,0,0,0])
-    elif data == 0:
+    elif data == 2:
       new_y_train.append([0,0,1,0,0])
-    elif data == 0:
+    elif data == 3:
       new_y_train.append([0,0,0,1,0])
     else:
       new_y_train.append([0,0,0,0,1])
@@ -89,9 +89,9 @@ def main():
       new_y_test.append([1,0,0,0,0])
     elif data == 1:
       new_y_test.append([0,1,0,0,0])
-    elif data == 0:
+    elif data == 2:
       new_y_test.append([0,0,1,0,0])
-    elif data == 0:
+    elif data == 3:
       new_y_test.append([0,0,0,1,0])
     else:
       new_y_test.append([0,0,0,0,1])
@@ -101,9 +101,9 @@ def main():
       new_y_val.append([1,0,0,0,0])
     elif data == 1:
       new_y_val.append([0,1,0,0,0])
-    elif data == 0:
+    elif data == 2:
       new_y_val.append([0,0,1,0,0])
-    elif data == 0:
+    elif data == 3:
       new_y_val.append([0,0,0,1,0])
     else:
       new_y_val.append([0,0,0,0,1])
