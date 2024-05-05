@@ -57,6 +57,7 @@ def main():
   for i in range(len(y)):
     y_labels.append(np.argmax(y[i],axis=0))
 
+  y_labels = np.asarray(y_labels)
   # print(X)
   print(y_labels)
 
@@ -69,44 +70,44 @@ def main():
   print(y_val)
 
   # Revert back to original test data
-  new_y_train = []
-  new_y_test = []
-  new_y_val = []
+  new_y_train = np.asarray([])
+  new_y_test = np.asarray([])
+  new_y_val = np.asarray([])
   for data in y_train:
     if data == 0:
-      new_y_train.append([1,0,0,0,0])
+      new_y_train = np.append(new_y_train, np.asarray([1,0,0,0,0]))
     elif data == 1:
-      new_y_train.append([0,1,0,0,0])
+      new_y_train = np.append(new_y_train, np.asarray([0,1,0,0,0]))
     elif data == 2:
-      new_y_train.append([0,0,1,0,0])
+      new_y_train = np.append(new_y_train, np.asarray([0,0,1,0,0]))
     elif data == 3:
-      new_y_train.append([0,0,0,1,0])
+      new_y_train = np.append(new_y_train, np.asarray([0,0,0,1,0]))
     else:
-      new_y_train.append([0,0,0,0,1])
+      new_y_train = np.append(new_y_train, np.asarray([0,0,0,0,1]))
 
   for data in y_test:
     if data == 0:
-      new_y_test.append([1,0,0,0,0])
+      new_y_test = np.append(new_y_test, np.asarray([1,0,0,0,0]))
     elif data == 1:
-      new_y_test.append([0,1,0,0,0])
+      new_y_test = np.append(new_y_test, np.asarray([0,1,0,0,0]))
     elif data == 2:
-      new_y_test.append([0,0,1,0,0])
+      new_y_test = np.append(new_y_test, np.asarray([0,0,1,0,0]))
     elif data == 3:
-      new_y_test.append([0,0,0,1,0])
+      new_y_test = np.append(new_y_test, np.asarray([0,0,0,1,0]))
     else:
-      new_y_test.append([0,0,0,0,1])
+      new_y_test = np.append(new_y_test, np.asarray([0,0,0,0,1]))
 
   for data in y_val:
     if data == 0:
-      new_y_val.append([1,0,0,0,0])
+      new_y_val = np.append(new_y_val, np.asarray([1,0,0,0,0]))
     elif data == 1:
-      new_y_val.append([0,1,0,0,0])
+      new_y_val = np.append(new_y_val, np.asarray([0,1,0,0,0]))
     elif data == 2:
-      new_y_val.append([0,0,1,0,0])
+      new_y_val = np.append(new_y_val, np.asarray([0,0,1,0,0]))
     elif data == 3:
-      new_y_val.append([0,0,0,1,0])
+      new_y_val = np.append(new_y_val, np.asarray([0,0,0,1,0]))
     else:
-      new_y_val.append([0,0,0,0,1])
+      new_y_val = np.append(new_y_val, np.asarray([0,0,0,0,1]))
 
 
   #datagen = ImageDataGenerator(
@@ -154,6 +155,7 @@ def main():
   # Early stopping
   early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
   
+  X_train = np.asarray(X_train)
   model.fit(x=X_train, y=new_y_train, batch_size=BATCH_SIZE, validation_data=(X_val, new_y_val), epochs=5, verbose=2, callbacks=[early_stopping])
   
   
