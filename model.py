@@ -49,15 +49,11 @@ def main():
     count+=1
     if count == 8000:
       break
-
-  X = np.array(X)
-  y = np.array(y)
   
   y_labels = []
   for i in range(len(y)):
     y_labels.append(np.argmax(y[i],axis=0))
 
-  y_labels = np.array(y_labels)
   # print(X)
   print(y_labels)
 
@@ -74,12 +70,13 @@ def main():
   new_y_test = []
   new_y_val = []
   for data in X_train:
-    new_y_train.append(np.where((X==data))[0][0])
+    new_y_train.append(y[X.index(data)])
   for data in X_test:
-    new_y_test.append(np.where((X==data))[0][0])
+    new_y_test.append(y[X.index(data)])
   for data in X_val:
-    new_y_val.append(np.where((X==data))[0][0])
+    new_y_val.append(y[X.index(data)])
 
+  
 
   #datagen = ImageDataGenerator(
     #rotation_range=10,
