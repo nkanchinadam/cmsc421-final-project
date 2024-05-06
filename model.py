@@ -36,7 +36,7 @@ def get_f1(y_true, y_pred):
 def main():
   X = []
   y = []
-  count = 0
+  #count = 0
   genre_data = json.load(open('./new_data/5LabelGenreDataDistinct.json', 'r'))
   for id in genre_data.keys():
     image = None
@@ -47,9 +47,9 @@ def main():
       continue
     X.append(image)
     y.append(genre_data[id])
-    count+=1
-    if count == 8000:
-      break
+    #count+=1
+    #if count == 8000:
+      #break
 
   X = np.asarray(X)
   y = np.asarray(y)
@@ -137,8 +137,8 @@ def main():
     height_shift_range=0.1,
     #shear_range=0.1,
     #zoom_range=0.1,
-    horizontal_flip=True,
-    vertical_flip=True,
+    #horizontal_flip=True,
+    #vertical_flip=True,
     #fill_mode='nearest'
   )
 
@@ -156,7 +156,7 @@ def main():
   #model.add(Dropout(0.1))
   model.add(Dense(1024, activation='relu'))#, kernel_regularizer=l2(0.001)))
   #model.add(Dropout(0.1))
-  #model.add(Dense(512, activation='relu'))#, kernel_regularizer=l2(0.001)))
+  model.add(Dense(512, activation='relu'))#, kernel_regularizer=l2(0.001)))
   #model.add(Dropout(0.1))
   #model.add(Dense(256, activation='relu'))#, kernel_regularizer=l2(0.1)))
   #model.add(Dropout(0.1))
@@ -176,9 +176,7 @@ def main():
   # Early stopping
   early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
   
-  X_train = np.asarray(X_train)
   model.fit(datagen.flow(X_train, new_y_train, batch_size=BATCH_SIZE), validation_data=(X_val, new_y_val), epochs=5, verbose=2, callbacks=[early_stopping])
-  
   
   test_pred = model.predict(X_test)
   
