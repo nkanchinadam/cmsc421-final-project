@@ -17,7 +17,8 @@ from keras.src.legacy.preprocessing.image import ImageDataGenerator
 import keras.src.legacy.backend as K
 import keras.backend as K2
 
-IMG_SIZE = [200, 200]
+IMG_SIZE_V2 = [200, 200]
+IMG_SIZE = (200, 200)
 IMG_SHAPE = IMG_SIZE + (3,)
 BATCH_SIZE = 32
 
@@ -40,7 +41,8 @@ def main():
   for id in genre_data.keys():
     image = None
     try:
-      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE, preserve_aspect_ratio=True))
+      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE_V2, preserve_aspect_ratio=True)) / 255.0
+      #image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
     except:
       continue
     X.append(image)
