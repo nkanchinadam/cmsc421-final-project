@@ -6,7 +6,6 @@ import pandas as pd
 import json
 import numpy as np
 from PIL import Image
-from skmultilearn.model_selection import iterative_train_test_split
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout, BatchNormalization
@@ -18,7 +17,7 @@ from keras.src.legacy.preprocessing.image import ImageDataGenerator
 import keras.src.legacy.backend as K
 import keras.backend as K2
 
-IMG_SIZE = (200, 200)
+IMG_SIZE = [200, 200]
 IMG_SHAPE = IMG_SIZE + (3,)
 BATCH_SIZE = 32
 
@@ -41,7 +40,7 @@ def main():
   for id in genre_data.keys():
     image = None
     try:
-      image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
+      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE, preserve_aspect_ratio=True))
     except:
       continue
     X.append(image)
@@ -52,6 +51,7 @@ def main():
 
   X = np.asarray(X)
   y = np.asarray(y)
+  print(X)
 
   y_labels = []
   for i in range(len(y)):
@@ -67,80 +67,80 @@ def main():
   new_y_train = np.array([[0,0,0,0,0]])
   new_y_test = np.array([[0,0,0,0,0]])
   new_y_val = np.array([[0,0,0,0,0]])
-  y_train_count = [0,0,0,0,0]
-  y_test_count = [0,0,0,0,0]
-  y_val_count = [0,0,0,0,0]
+  #y_train_count = [0,0,0,0,0]
+  #y_test_count = [0,0,0,0,0]
+  #y_val_count = [0,0,0,0,0]
   for data in y_train:
     if data == 0:
       new_y_train = np.concatenate((new_y_train, np.array([[1,0,0,0,0]])), axis=0)
-      y_train_count[0] += 1
+      #y_train_count[0] += 1
     elif data == 1:
       new_y_train = np.concatenate((new_y_train, np.array([[0,1,0,0,0]])), axis=0)
-      y_train_count[1] += 1
+      #y_train_count[1] += 1
     elif data == 2:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,1,0,0]])), axis=0)
-      y_train_count[2] += 1
+      #y_train_count[2] += 1
     elif data == 3:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,1,0]])), axis=0)
-      y_train_count[3] += 1
+      #y_train_count[3] += 1
     else:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,0,1]])), axis=0)
-      y_train_count[4] += 1
+      #y_train_count[4] += 1
 
   for data in y_test:
     if data == 0:
       new_y_test = np.concatenate((new_y_test, np.array([[1,0,0,0,0]])), axis=0)
-      y_test_count[0] += 1
+      #y_test_count[0] += 1
     elif data == 1:
       new_y_test = np.concatenate((new_y_test, np.array([[0,1,0,0,0]])), axis=0)
-      y_test_count[1] += 1
+      #y_test_count[1] += 1
     elif data == 2:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,1,0,0]])), axis=0)
-      y_test_count[2] += 1
+      #y_test_count[2] += 1
     elif data == 3:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,1,0]])), axis=0)
-      y_test_count[3] += 1
+      #y_test_count[3] += 1
     else:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,0,1]])), axis=0)
-      y_test_count[4] += 1
+      #y_test_count[4] += 1
 
   for data in y_val:
     if data == 0:
       new_y_val = np.concatenate((new_y_val, np.array([[1,0,0,0,0]])), axis=0)
-      y_val_count[0] += 1
+      #y_val_count[0] += 1
     elif data == 1:
       new_y_val = np.concatenate((new_y_val, np.array([[0,1,0,0,0]])), axis=0)
-      y_val_count[1] += 1
+      #y_val_count[1] += 1
     elif data == 2:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,1,0,0]])), axis=0)
-      y_val_count[2] += 1
+      #y_val_count[2] += 1
     elif data == 3:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,1,0]])), axis=0)
-      y_val_count[3] += 1
+      #y_val_count[3] += 1
     else:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,0,1]])), axis=0)
-      y_val_count[4] += 1
+      #y_val_count[4] += 1
 
   new_y_train = new_y_train[1:]
   new_y_val = new_y_val[1:]
   new_y_test = new_y_test[1:]
 
-  print(y_train_count)
-  print(y_test_count)
-  print(y_val_count)
+  #print(y_train_count)
+  #print(y_test_count)
+  #print(y_val_count)
 
-  #datagen = ImageDataGenerator(
-    #rotation_range=10,
-    #width_shift_range=0.1,
-    #height_shift_range=0.1,
+  datagen = ImageDataGenerator(
+    rotation_range=10,
+    width_shift_range=0.1,
+    height_shift_range=0.1,
     #shear_range=0.1,
     #zoom_range=0.1,
-    #horizontal_flip=True,
-    #vertical_flip=True,
+    horizontal_flip=True,
+    vertical_flip=True,
     #fill_mode='nearest'
-  #)
+  )
 
-  #datagen.fit(X_train)
+  datagen.fit(X_train)
   
   base_model = tf.keras.applications.MobileNetV2(input_shape=IMG_SHAPE, include_top=False, weights='imagenet')
 
@@ -175,7 +175,7 @@ def main():
   early_stopping = EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
   
   X_train = np.asarray(X_train)
-  model.fit(x=X_train, y=new_y_train, batch_size=BATCH_SIZE, validation_data=(X_val, new_y_val), epochs=5, verbose=2, callbacks=[early_stopping])
+  model.fit(datagen.flow(X_train, new_y_train, batch_size=BATCH_SIZE), validation_data=(X_val, new_y_val), epochs=5, verbose=2, callbacks=[early_stopping])
   
   
   test_pred = model.predict(X_test)
