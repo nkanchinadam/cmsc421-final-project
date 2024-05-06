@@ -58,60 +58,76 @@ def main():
     y_labels.append(np.argmax(y[i],axis=0))
 
   y_labels = np.asarray(y_labels)
-  # print(X)
-  print(y_labels)
 
   X_train, X_test, y_train, y_test = train_test_split(X, y_labels, test_size=0.2, random_state=1, stratify=y_labels)
   X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.25, random_state=1, stratify=y_train)
 
-  # print(X_test)
-  print(y_test)
-  # print(X_val)
-  print(y_val)
 
   # Revert back to original test data
   new_y_train = np.array([[0,0,0,0,0]])
   new_y_test = np.array([[0,0,0,0,0]])
   new_y_val = np.array([[0,0,0,0,0]])
+  y_train_count = [0,0,0,0,0]
+  y_test_count = [0,0,0,0,0]
+  y_val_count = [0,0,0,0,0]
   for data in y_train:
     if data == 0:
       new_y_train = np.concatenate((new_y_train, np.array([[1,0,0,0,0]])), axis=0)
+      y_train_count[0] += 1
     elif data == 1:
       new_y_train = np.concatenate((new_y_train, np.array([[0,1,0,0,0]])), axis=0)
+      y_train_count[1] += 1
     elif data == 2:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,1,0,0]])), axis=0)
+      y_train_count[2] += 1
     elif data == 3:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,1,0]])), axis=0)
+      y_train_count[3] += 1
     else:
       new_y_train = np.concatenate((new_y_train, np.array([[0,0,0,0,1]])), axis=0)
+      y_train_count[4] += 1
 
   for data in y_test:
     if data == 0:
       new_y_test = np.concatenate((new_y_test, np.array([[1,0,0,0,0]])), axis=0)
+      y_test_count[0] += 1
     elif data == 1:
       new_y_test = np.concatenate((new_y_test, np.array([[0,1,0,0,0]])), axis=0)
+      y_test_count[1] += 1
     elif data == 2:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,1,0,0]])), axis=0)
+      y_test_count[2] += 1
     elif data == 3:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,1,0]])), axis=0)
+      y_test_count[3] += 1
     else:
       new_y_test = np.concatenate((new_y_test, np.array([[0,0,0,0,1]])), axis=0)
+      y_test_count[4] += 1
 
   for data in y_val:
     if data == 0:
       new_y_val = np.concatenate((new_y_val, np.array([[1,0,0,0,0]])), axis=0)
+      y_val_count[0] += 1
     elif data == 1:
       new_y_val = np.concatenate((new_y_val, np.array([[0,1,0,0,0]])), axis=0)
+      y_val_count[1] += 1
     elif data == 2:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,1,0,0]])), axis=0)
+      y_val_count[2] += 1
     elif data == 3:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,1,0]])), axis=0)
+      y_val_count[3] += 1
     else:
       new_y_val = np.concatenate((new_y_val, np.array([[0,0,0,0,1]])), axis=0)
+      y_val_count[4] += 1
 
   new_y_train = new_y_train[1:]
   new_y_val = new_y_val[1:]
   new_y_test = new_y_test[1:]
+
+  print(y_train_count)
+  print(y_test_count)
+  print(y_val_count)
 
   #datagen = ImageDataGenerator(
     #rotation_range=10,
