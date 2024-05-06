@@ -41,7 +41,7 @@ def main():
   for id in genre_data.keys():
     image = None
     try:
-      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE_V2, preserve_aspect_ratio=True)) / 255.0
+      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE_V2)) / 255.0
       #image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
     except:
       continue
