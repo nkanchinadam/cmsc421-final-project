@@ -23,6 +23,7 @@ val_path = "./PathAndClassVal.csv"
 IMAGE_SIZE = 224
 data_transform = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)), 
                                              transforms.ToTensor()])
+data_transform_val = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),transforms.ToTensor()])
 
 class CustomDataSet(Dataset):
     def __init__(self, csv_file, class_list=None, transform=None):
@@ -42,7 +43,7 @@ class CustomDataSet(Dataset):
 
 def get_data(batch_size=64):
     dataset_train = CustomDataSet(csv_file=train_path, transform=data_transform)
-    dataset_val = CustomDataSet(csv_file=val_path)
+    dataset_val = CustomDataSet(csv_file=val_path, transform=data_transform_val)
     
     # Create data loaders.
     train_loader = DataLoader(
@@ -113,9 +114,12 @@ def train(model, trainloader, optimizer, criterion, device):
         # Calculate the accuracy.
         #_, preds = torch.max(outputs.data, 1)
         #print(preds)
-
-        train_running_correct += (outputs.data == labels).sum().item()
+        diffs = torch.sub(outputs.data, labels)
+        accuracy = torch.sum(diffs*diffs, dim=1)
+        vals = torch.tensor([1.0 if acc <= 0.05 else 0.0 for acc in accuracy])
+        train_running_correct += vals.sum().item()
         # Backpropagation
+
         loss.backward()
         # Update the weights.
         optimizer.step()
@@ -138,15 +142,19 @@ def validate(model, testloader, criterion, device):
             
             image, labels = data
             image = image.to(device)
-            labels = labels.to(device)
+            labels = [[float(val) for val in label[1:-1].split(', ')] for label in labels]
+            labels = torch.tensor(labels)
             # Forward pass.
             outputs = model(image)
             # Calculate the loss.
             loss = criterion(outputs, labels)
             valid_running_loss += loss.item()
             # Calculate the accuracy.
-            _, preds = torch.max(outputs.data, 1)
-            valid_running_correct += (preds == labels).sum().item()
+            #_, preds = torch.max(outputs.data, 1)
+            diffs = torch.sub(outputs.data, labels)
+            accuracy = torch.sum(diffs*diffs, dim=1)
+            vals = torch.tensor([1.0 if acc <= 0.05 else 0.0 for acc in accuracy])
+            valid_running_correct += vals.sum().item()
         
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
@@ -166,7 +174,8 @@ our_layers = nn.Sequential(
     nn.ReLU(),
     nn.Linear(256, 128),
     nn.ReLU(),
-    nn.Linear(128, 5)
+    nn.Linear(128, 5),
+    nn.Sigmoid()
 )
 
 model.fc = our_layers
@@ -183,7 +192,7 @@ train_loader, valid_loader = get_data(batch_size=batch_size)
 # Optimizer.
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCEWithLogitsLoss()
 
 # Lists to keep track of losses and accuracies.
 train_loss, valid_loss = [], []
