@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import os
 import json
+import pprint
 
 #put your name here, so each file is different
 CSV_FILENAME = 'MovieGenre'
@@ -35,21 +36,35 @@ def main():
     df = df.dropna()
     df = df.drop_duplicates(subset=['imdbId'])
 
-    genre_labels = json.load(open('./new_data/5GenreLabels.json'))
-
+    genre_labels = json.load(open('./data/genreLabels.json'))
+    count = {}
     genre_data = {}
+    NUM_CLASSES = 5
+    accepting_labels = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
+    
+    for label in genre_labels:
+        count[label] = 0
+
     i = 0
     for imdbId in df['imdbId']:
-        print(i)
         i += 1
         row = df[df['imdbId'] == imdbId]
         if get_image_filedir(imdbId):
             movie_genres = row['Genre'].values[0].split('|')
-            label_vector = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
-            if label_vector.count(0.0) != len(genre_labels):
-                genre_data[imdbId] = label_vector
-
-    with open('./new_data/5LabelGenreData.json', 'w') as f:
+            
+            label_vector = [1.0 if label in movie_genres else 0.0 for label in accepting_labels]
+            genre_data[imdbId] = label_vector
+            
+            # label_vector = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
+            # if label_vector.count(0.0) == len(genre_labels) - 1:
+            #     genre_data[imdbId] = label_vector
+            
+            for genre in movie_genres:
+                count[genre] += 1
+                
+    print("number of distict posters:", i)
+    pprint.pp(dict(sorted(count.items(), key=lambda item: item[1])))
+    with open('./new_data/Top5GenreData.json', 'w') as f:
         json.dump(genre_data, f)
 
 if __name__ == "__main__":
