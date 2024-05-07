@@ -38,10 +38,13 @@ def main():
   y = []
   #count = 0
   genre_data = json.load(open('./new_data/5LabelGenreDataDistinct.json', 'r'))
+  i = 0
   for id in genre_data.keys():
+    print(i)
+    i += 1
     image = None
     try:
-      image = np.asarray(tf.image.resize(Image.open('./images/' + id + '.png').convert('RGB'), size=IMG_SIZE_V2)) / 255.0
+      image = np.asarray(tf.image.resize_with_pad(Image.open('./images/' + id + '.png').convert('RGB'), target_height=IMG_SIZE_V2[0], target_width=IMG_SIZE_V2[1])) / 255.0
       #image = np.asarray(Image.open('./images/' + id + '.png').convert('RGB').resize(IMG_SIZE)) / 256.0
     except:
       continue
