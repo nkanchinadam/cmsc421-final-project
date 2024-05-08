@@ -13,6 +13,7 @@ from torchvision.transforms import ToTensor, transforms
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import pandas as pd
+from sklearn.metrics import f1_score
 
 import os
 from PIL import Image
@@ -103,8 +104,10 @@ def train(model, trainloader, optimizer, criterion, device):
     train_running_loss = 0.0
     train_running_count = 0
     train_total_count = 0
-    metric = BinaryAccuracy(threshold=0)
+    # metric = BinaryAccuracy(threshold=0)
     counter = 0
+    total_labels = []
+    total_outputs = []
     for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
         counter += 1
         image, labels = data
@@ -124,14 +127,22 @@ def train(model, trainloader, optimizer, criterion, device):
         #for i in range(len(outputs.data)):
             #metric.update(outputs.data[i, :], labels[i, :])
         
-        
+        # conversion into 1 and 0
+        total_labels.append(labels)
+        temp_output = []
+
+        # Accuracy + F1 Score
         for i in range(len(outputs.data)):
             output = outputs.data[i, :]
             label = labels[i,:]
-            output = torch.tensor([1.0 if o >= 0 else 0.0 for o in output])
-            train_total_count += 1
-            if torch.all(torch.eq(output, label)):
-                train_running_count += 1
+            output = [1.0 if o >= 0 else 0.0 for o in output]
+            if output:
+                temp_output.append(output)
+                output = torch.tensor(output)
+                train_total_count += 1
+                if torch.all(torch.eq(output, label)):
+                    train_running_count += 1
+        total_outputs.append(temp_output)
 
         # Backpropagation
 
@@ -143,8 +154,11 @@ def train(model, trainloader, optimizer, criterion, device):
     epoch_loss = train_running_loss / counter
     # epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
     # epoch_acc = metric.compute()
+    total_labels = np.concatenate(np.array(total_labels, dtype="object"))
+    total_outputs =  np.concatenate(np.array(total_outputs, dtype="object"))
     epoch_acc = train_running_count / train_total_count
-    return epoch_loss, epoch_acc
+    epoch_f1 = f1_score(total_labels, total_outputs, average='samples', zero_division=0)
+    return epoch_loss, epoch_acc, epoch_f1
 
 def validate(model, testloader, criterion, device):
     model.eval()
@@ -154,6 +168,8 @@ def validate(model, testloader, criterion, device):
     counter = 0
     valid_running_count = 0
     total_running_count = 0
+    total_labels = []
+    total_outputs = []
     with torch.no_grad():
         for i, data in tqdm(enumerate(testloader), total=len(testloader)):
             counter += 1
@@ -174,20 +190,31 @@ def validate(model, testloader, criterion, device):
             #for i in range(len(outputs.data)):
                 #metric.update(outputs.data[i, :], labels[i, :])
 
+            total_labels.append(labels)
+            temp_output = []
+
+            # Accuracy + F1 Score
             for i in range(len(outputs.data)):
                 output = outputs.data[i, :]
                 label = labels[i,:]
-                output = torch.tensor([1.0 if o >= 0 else 0.0 for o in output])
-                total_running_count += 1
-                if torch.all(torch.eq(output, label)):
-                    valid_running_count += 1
+                output = [1.0 if o >= 0 else 0.0 for o in output]
+                if output:
+                    temp_output.append(output)
+                    output = torch.tensor(output)
+                    total_running_count += 1
+                    if torch.all(torch.eq(output, label)):
+                        valid_running_count += 1
+            total_outputs.append(temp_output)
 
         
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
     #epoch_acc = metric.compute()
     epoch_acc = valid_running_count / total_running_count
-    return epoch_loss, epoch_acc
+    total_labels = np.concatenate(np.array(total_labels))
+    total_outputs =  np.concatenate(np.array(total_outputs))
+    epoch_f1 = f1_score(total_labels, total_outputs, average='samples', zero_division=0)
+    return epoch_loss, epoch_acc, epoch_f1
 
 
 # Pre-trained resnet that we will freeze
@@ -201,7 +228,8 @@ summary(model, input_size=(1, 3, 224, 224))
 
 epochs=20
 batch_size=32
-learning_rate = 0.001
+learning_rate = 0.1
+label_name = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 train_loader, valid_loader = get_data(batch_size=batch_size)
@@ -214,37 +242,44 @@ criterion = nn.BCEWithLogitsLoss()
 # Lists to keep track of losses and accuracies.
 train_loss, valid_loss = [], []
 train_acc, valid_acc = [], []
+train_f1, valid_f1 = [], []
 # Start the training.
 for epoch in range(epochs):
     print(f"[INFO]: Epoch {epoch+1} of {epochs}")
-    train_epoch_loss, train_epoch_acc = train(
+    train_epoch_loss, train_epoch_acc, train_epoch_f1 = train(
         model, 
         train_loader, 
         optimizer, 
         criterion,
         device
     )
-    valid_epoch_loss, valid_epoch_acc = validate(
+    valid_epoch_loss, valid_epoch_acc, valid_epoch_f1 = validate(
         model, 
         valid_loader, 
         criterion,
         device
     )
+    
     train_loss.append(train_epoch_loss)
     valid_loss.append(valid_epoch_loss)
     train_acc.append(train_epoch_acc)
     valid_acc.append(valid_epoch_acc)
-    print(f"Training loss: {train_epoch_loss:.3f}, training acc: {train_epoch_acc:.3f}")
-    print(f"Validation loss: {valid_epoch_loss:.3f}, validation acc: {valid_epoch_acc:.3f}")
+    train_f1.append(train_epoch_f1)
+    valid_f1.append(valid_epoch_f1)
+    print(f"Training loss: {train_epoch_loss:.3f}, Training acc: {train_epoch_acc:.3f}, Training F1 Score: {train_epoch_f1:.3f}")
+    print(f"Validation loss: {valid_epoch_loss:.3f}, Validation acc: {valid_epoch_acc:.3f}, Validation F1 Score: {valid_epoch_f1:.3f}")
+    
     print('-'*50)
     
 # Save the loss and accuracy plots.
 save_plots(
     train_acc, 
     valid_acc, 
+    train_f1,
+    valid_f1,
     train_loss, 
     valid_loss, 
-    name="Random"
+    name="Metrics"
 )
 print('TRAINING COMPLETE')
 
