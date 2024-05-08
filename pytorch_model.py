@@ -198,8 +198,6 @@ def validate(model, testloader, criterion, device):
                 if torch.all(torch.eq(output, label)):
                     valid_running_count += 1
 
-    print(total_labels)
-    print(total_outputs)
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
     #epoch_acc = metric.compute()
@@ -219,7 +217,7 @@ model.fc = nn.Linear(512, 5)
 #model.fc = nn.Linear(1024, 5)
 summary(model, input_size=(1, 3, 224, 224))
 
-epochs=20
+epochs=10
 batch_size=32
 learning_rate = 0.1
 label_name = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
@@ -239,12 +237,6 @@ train_f1, valid_f1 = [], []
 # Start the training.
 for epoch in range(epochs):
     print(f"[INFO]: Epoch {epoch+1} of {epochs}")
-    valid_epoch_loss, valid_epoch_acc, valid_epoch_f1 = validate(
-        model, 
-        valid_loader, 
-        criterion,
-        device
-    )
     train_epoch_loss, train_epoch_acc, train_epoch_f1 = train(
         model, 
         train_loader, 
@@ -252,7 +244,12 @@ for epoch in range(epochs):
         criterion,
         device
     )
-
+    valid_epoch_loss, valid_epoch_acc, valid_epoch_f1 = validate(
+        model, 
+        valid_loader, 
+        criterion,
+        device
+    )
     
     train_loss.append(train_epoch_loss)
     valid_loss.append(valid_epoch_loss)
