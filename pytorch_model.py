@@ -21,7 +21,7 @@ train_path = "./PathAndClassTrain.csv"
 val_path = "./PathAndClassVal.csv"
 # define the image transformations 
 IMAGE_SIZE = 224
-data_transform = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)), 
+data_transform = transforms.Compose([transforms.RandomCrop((IMAGE_SIZE, IMAGE_SIZE), pad_if_needed=True), 
                                              transforms.ToTensor()])
 data_transform_val = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),transforms.ToTensor()])
 
@@ -114,10 +114,8 @@ def train(model, trainloader, optimizer, criterion, device):
         # Calculate the accuracy.
         #_, preds = torch.max(outputs.data, 1)
         #print(preds)
-        diffs = torch.sub(outputs.data, labels)
-        accuracy = torch.sum(diffs*diffs, dim=1)
-        vals = torch.tensor([1.0 if acc <= 0.05 else 0.0 for acc in accuracy])
-        train_running_correct += vals.sum().item()
+        outputs.data = torch.tensor([[abs(np.round(val)) for val in pred] for pred in outputs.data])
+        train_running_correct += (outputs.data == labels).sum().item()
         # Backpropagation
 
         loss.backward()
@@ -151,10 +149,8 @@ def validate(model, testloader, criterion, device):
             valid_running_loss += loss.item()
             # Calculate the accuracy.
             #_, preds = torch.max(outputs.data, 1)
-            diffs = torch.sub(outputs.data, labels)
-            accuracy = torch.sum(diffs*diffs, dim=1)
-            vals = torch.tensor([1.0 if acc <= 0.05 else 0.0 for acc in accuracy])
-            valid_running_correct += vals.sum().item()
+            outputs.data = torch.tensor([[abs(np.round(val)) for val in pred] for pred in outputs.data])
+            valid_running_correct += (outputs.data == labels).sum().item()
         
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
@@ -175,7 +171,7 @@ our_layers = nn.Sequential(
     nn.Linear(256, 128),
     nn.ReLU(),
     nn.Linear(128, 5),
-    nn.Sigmoid()
+
 )
 
 model.fc = our_layers
@@ -183,8 +179,8 @@ model.fc = our_layers
 summary(model, input_size=(1, 3, 224, 224))
 
 epochs=20
-batch_size=64
-learning_rate = 0.01
+batch_size=32
+learning_rate = 0.1
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 train_loader, valid_loader = get_data(batch_size=batch_size)
