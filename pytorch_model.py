@@ -247,3 +247,5 @@ save_plots(
     name="Random"
 )
 print('TRAINING COMPLETE')
+
+torch.save(model.state_dict(), "./ResNetModel.pt")
