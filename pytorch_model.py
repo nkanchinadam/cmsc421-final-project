@@ -8,11 +8,12 @@ import torchvision
 from torchinfo import summary
 from torchvision import datasets
 from torch.utils.data import DataLoader, Dataset
+from torcheval.metrics import BinaryAccuracy
 from torchvision.transforms import ToTensor, transforms
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import pandas as pd
-import time
+
 import os
 from PIL import Image
 import pandas as pd
@@ -21,9 +22,12 @@ train_path = "./PathAndClassTrain.csv"
 val_path = "./PathAndClassVal.csv"
 # define the image transformations 
 IMAGE_SIZE = 224
-data_transform = transforms.Compose([transforms.RandomCrop((IMAGE_SIZE, IMAGE_SIZE), pad_if_needed=True), 
-                                             transforms.ToTensor()])
-data_transform_val = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),transforms.ToTensor()])
+data_transform = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)), 
+                                     transforms.RandomHorizontalFlip(p=0.5),
+                                     transforms.RandomRotation(degrees=45),
+                                     transforms.ToTensor()])
+data_transform_val = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
+                                         transforms.ToTensor()])
 
 class CustomDataSet(Dataset):
     def __init__(self, csv_file, class_list=None, transform=None):
@@ -97,7 +101,9 @@ def train(model, trainloader, optimizer, criterion, device):
     model.train()
     print('Training')
     train_running_loss = 0.0
-    train_running_correct = 0
+    train_running_count = 0
+    train_total_count = 0
+    metric = BinaryAccuracy(threshold=0)
     counter = 0
     for i, data in tqdm(enumerate(trainloader), total=len(trainloader)):
         counter += 1
@@ -108,14 +114,25 @@ def train(model, trainloader, optimizer, criterion, device):
         optimizer.zero_grad()
         # Forward pass.
         outputs = model(image)
-        # Calculate the loss.
+        # Calculate loss
         loss = criterion(outputs, labels)
         train_running_loss += loss.item()
         # Calculate the accuracy.
         #_, preds = torch.max(outputs.data, 1)
         #print(preds)
-        outputs.data = torch.tensor([[abs(np.round(val)) for val in pred] for pred in outputs.data])
-        train_running_correct += (outputs.data == labels).sum().item()
+        
+        #for i in range(len(outputs.data)):
+            #metric.update(outputs.data[i, :], labels[i, :])
+        
+        
+        for i in range(len(outputs.data)):
+            output = outputs.data[i, :]
+            label = labels[i,:]
+            output = torch.tensor([1.0 if o >= 0 else 0.0 for o in output])
+            train_total_count += 1
+            if torch.all(torch.eq(output, label)):
+                train_running_count += 1
+
         # Backpropagation
 
         loss.backward()
@@ -125,15 +142,18 @@ def train(model, trainloader, optimizer, criterion, device):
     # Loss and accuracy for the complete epoch.
     epoch_loss = train_running_loss / counter
     # epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
-    epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
+    # epoch_acc = metric.compute()
+    epoch_acc = train_running_count / train_total_count
     return epoch_loss, epoch_acc
 
 def validate(model, testloader, criterion, device):
     model.eval()
     print('Validation')
     valid_running_loss = 0.0
-    valid_running_correct = 0
+    #metric = BinaryAccuracy(threshold=0)
     counter = 0
+    valid_running_count = 0
+    total_running_count = 0
     with torch.no_grad():
         for i, data in tqdm(enumerate(testloader), total=len(testloader)):
             counter += 1
@@ -149,12 +169,24 @@ def validate(model, testloader, criterion, device):
             valid_running_loss += loss.item()
             # Calculate the accuracy.
             #_, preds = torch.max(outputs.data, 1)
-            outputs.data = torch.tensor([[abs(np.round(val)) for val in pred] for pred in outputs.data])
-            valid_running_correct += (outputs.data == labels).sum().item()
+
+            # [0, 1, 0, 0, 0] and [1, 0, 0, 0, 0] accuracy of 60% 
+            #for i in range(len(outputs.data)):
+                #metric.update(outputs.data[i, :], labels[i, :])
+
+            for i in range(len(outputs.data)):
+                output = outputs.data[i, :]
+                label = labels[i,:]
+                output = torch.tensor([1.0 if o >= 0 else 0.0 for o in output])
+                total_running_count += 1
+                if torch.all(torch.eq(output, label)):
+                    valid_running_count += 1
+
         
     # Loss and accuracy for the complete epoch.
     epoch_loss = valid_running_loss / counter
-    epoch_acc = 100. * (valid_running_correct / len(testloader.dataset))
+    #epoch_acc = metric.compute()
+    epoch_acc = valid_running_count / total_running_count
     return epoch_loss, epoch_acc
 
 
@@ -164,21 +196,12 @@ model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
 for param in model.parameters():
     param.requires_grad = False
 
-# our model that we will train
-our_layers = nn.Sequential(
-    nn.Linear(512, 256),
-    nn.ReLU(),
-    nn.Linear(256, 5),
-    nn.Sigmoid(),
-)
-
-model.fc = our_layers
-
+model.fc = nn.Linear(512, 5)
 summary(model, input_size=(1, 3, 224, 224))
 
 epochs=20
 batch_size=32
-learning_rate = 0.1
+learning_rate = 0.001
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 train_loader, valid_loader = get_data(batch_size=batch_size)
