@@ -113,49 +113,50 @@ def train(model, trainloader, optimizer, criterion, device):
         image, labels = data
         image = image.to(device)
         labels = [[float(val) for val in label[1:-1].split(', ')] for label in labels]
-        labels = torch.tensor(labels)
-        optimizer.zero_grad()
-        # Forward pass.
-        outputs = model(image)
-        # Calculate loss
-        loss = criterion(outputs, labels)
-        train_running_loss += loss.item()
-        # Calculate the accuracy.
-        #_, preds = torch.max(outputs.data, 1)
-        #print(preds)
-        
-        #for i in range(len(outputs.data)):
-            #metric.update(outputs.data[i, :], labels[i, :])
-        
-        # conversion into 1 and 0
-        total_labels.append(labels)
-        temp_output = []
+        if type(labels) == list:
+            total_labels.append(labels)
+            labels = torch.tensor(labels)
+            optimizer.zero_grad()
+            # Forward pass.
+            outputs = model(image)
+            # Calculate loss
+            loss = criterion(outputs, labels)
+            train_running_loss += loss.item()
+            # Calculate the accuracy.
+            #_, preds = torch.max(outputs.data, 1)
+            #print(preds)
+            
+            #for i in range(len(outputs.data)):
+                #metric.update(outputs.data[i, :], labels[i, :])
+            
+            # conversion into 1 and 0
+            temp_output = []
 
-        # Accuracy + F1 Score
-        for i in range(len(outputs.data)):
-            output = outputs.data[i, :]
-            label = labels[i,:]
-            output = [1.0 if o >= 0 else 0.0 for o in output]
-            if output:
-                temp_output.append(output)
-                output = torch.tensor(output)
-                train_total_count += 1
-                if torch.all(torch.eq(output, label)):
-                    train_running_count += 1
-        total_outputs.append(temp_output)
+            # Accuracy + F1 Score
+            for i in range(len(outputs.data)):
+                output = outputs.data[i, :]
+                label = labels[i,:]
+                output = [1.0 if o >= 0 else 0.0 for o in output]
+                if type(output) == list:
+                    temp_output.append(output)
+                    output = torch.tensor(output)
+                    train_total_count += 1
+                    if torch.all(torch.eq(output, label)):
+                        train_running_count += 1
+            total_outputs.append(temp_output)
 
-        # Backpropagation
+            # Backpropagation
 
-        loss.backward()
-        # Update the weights.
-        optimizer.step()
+            loss.backward()
+            # Update the weights.
+            optimizer.step()
     
     # Loss and accuracy for the complete epoch.
     epoch_loss = train_running_loss / counter
     # epoch_acc = 100. * (train_running_correct / len(trainloader.dataset))
     # epoch_acc = metric.compute()
-    total_labels = np.concatenate(np.array(total_labels, dtype="object"))
-    total_outputs =  np.concatenate(np.array(total_outputs, dtype="object"))
+    total_labels = np.concatenate(np.array(total_labels))
+    total_outputs =  np.concatenate(np.array(total_outputs))
     epoch_acc = train_running_count / train_total_count
     epoch_f1 = f1_score(total_labels, total_outputs, average='samples', zero_division=0)
     return epoch_loss, epoch_acc, epoch_f1
@@ -177,34 +178,36 @@ def validate(model, testloader, criterion, device):
             image, labels = data
             image = image.to(device)
             labels = [[float(val) for val in label[1:-1].split(', ')] for label in labels]
-            labels = torch.tensor(labels)
-            # Forward pass.
-            outputs = model(image)
-            # Calculate the loss.
-            loss = criterion(outputs, labels)
-            valid_running_loss += loss.item()
-            # Calculate the accuracy.
-            #_, preds = torch.max(outputs.data, 1)
+            if type(labels) == list:
+                total_labels.append(labels)
+                labels = torch.tensor(labels)
+                # Forward pass.
+                outputs = model(image)
+                # Calculate the loss.
+                loss = criterion(outputs, labels)
+                valid_running_loss += loss.item()
+                # Calculate the accuracy.
+                #_, preds = torch.max(outputs.data, 1)
 
-            # [0, 1, 0, 0, 0] and [1, 0, 0, 0, 0] accuracy of 60% 
-            #for i in range(len(outputs.data)):
-                #metric.update(outputs.data[i, :], labels[i, :])
+                # [0, 1, 0, 0, 0] and [1, 0, 0, 0, 0] accuracy of 60% 
+                #for i in range(len(outputs.data)):
+                    #metric.update(outputs.data[i, :], labels[i, :])
 
-            total_labels.append(labels)
-            temp_output = []
+                
+                temp_output = []
 
-            # Accuracy + F1 Score
-            for i in range(len(outputs.data)):
-                output = outputs.data[i, :]
-                label = labels[i,:]
-                output = [1.0 if o >= 0 else 0.0 for o in output]
-                if output:
-                    temp_output.append(output)
-                    output = torch.tensor(output)
-                    total_running_count += 1
-                    if torch.all(torch.eq(output, label)):
-                        valid_running_count += 1
-            total_outputs.append(temp_output)
+                # Accuracy + F1 Score
+                for i in range(len(outputs.data)):
+                    output = outputs.data[i, :]
+                    label = labels[i,:]
+                    output = [1.0 if o >= 0 else 0.0 for o in output]
+                    if type(output) == list:
+                        temp_output.append(output)
+                        output = torch.tensor(output)
+                        total_running_count += 1
+                        if torch.all(torch.eq(output, label)):
+                            valid_running_count += 1
+                total_outputs.append(temp_output)
 
         
     # Loss and accuracy for the complete epoch.
@@ -219,6 +222,7 @@ def validate(model, testloader, criterion, device):
 
 # Pre-trained resnet that we will freeze
 model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+# model = torchvision.models.GoogLeNet(weights='IMAGENET1K_V1')
 
 for param in model.parameters():
     param.requires_grad = False
