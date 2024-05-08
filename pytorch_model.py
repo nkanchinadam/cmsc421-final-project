@@ -168,10 +168,8 @@ for param in model.parameters():
 our_layers = nn.Sequential(
     nn.Linear(512, 256),
     nn.ReLU(),
-    nn.Linear(256, 128),
-    nn.ReLU(),
-    nn.Linear(128, 5),
-
+    nn.Linear(256, 5),
+    nn.Sigmoid(),
 )
 
 model.fc = our_layers
