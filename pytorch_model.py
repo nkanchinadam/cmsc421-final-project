@@ -207,17 +207,17 @@ def validate(model, testloader, criterion, device):
 
 
 # Pre-trained resnet that we will freeze
-model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
-#model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
+#model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
 
 for param in model.parameters():
     param.requires_grad = False
 
-model.fc = nn.Linear(512, 5)
-#model.fc = nn.Linear(1024, 5)
+#model.fc = nn.Linear(512, 5)
+model.fc = nn.Linear(1024, 5)
 summary(model, input_size=(1, 3, 224, 224))
 
-epochs=10
+epochs=2
 batch_size=32
 learning_rate = 0.1
 label_name = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
@@ -262,16 +262,13 @@ for epoch in range(epochs):
     
     print('-'*50)
     
+torch.save(model.state_dict(), "./ResNetModel.pt")
 # Save the loss and accuracy plots.
-save_plots(
-    train_acc, 
-    valid_acc, 
-    train_f1,
-    valid_f1,
-    train_loss, 
-    valid_loss, 
-    name="Metrics"
-)
+plt.plot(train_loss)
+plt.plot(valid_loss)
+plt.show()
+plt.plot(train_f1)
+plt.plot(valid_f1)
+plt.show()
 print('TRAINING COMPLETE')
 
-torch.save(model.state_dict(), "./ResNetModel.pt")
