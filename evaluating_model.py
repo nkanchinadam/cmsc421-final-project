@@ -31,8 +31,8 @@ class CustomDataSet(Dataset):
         return image, label
 
 model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
-names = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
-model.fc = nn.Linear(512, 5)
+names = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
+model.fc = nn.Linear(512, 6)
 model.load_state_dict(torch.load('./ResNetModel.pt'))
 
 dataset = CustomDataSet(csv_file=test_path, transform=data_transform_test)
@@ -40,7 +40,7 @@ dataset = CustomDataSet(csv_file=test_path, transform=data_transform_test)
 test_loader = DataLoader(dataset=dataset, batch_size=1, shuffle=False)
 
 # true positive - false positive - true negative - false negative
-metric = [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]]
+metric = [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]]
 counter = 0
 for i, data in tqdm(enumerate(test_loader), total=len(test_loader)):
   counter+=1
