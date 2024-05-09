@@ -30,10 +30,13 @@ class CustomDataSet(Dataset):
             image = self.transform(image)
         return image, label
 
-model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+# model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
 names = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
-model.fc = nn.Linear(512, 6)
-model.load_state_dict(torch.load('./ResNetModel.pt'))
+#model.fc = nn.Linear(512, 6)
+model.fc = nn.Linear(1024, 6)
+# model.load_state_dict(torch.load('./ResNetModel.pt'))
+model.load_state_dict(torch.load('./GoogleNetModel.pt'))
 
 dataset = CustomDataSet(csv_file=test_path, transform=data_transform_test)
 
