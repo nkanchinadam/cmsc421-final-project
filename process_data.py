@@ -6,6 +6,8 @@ import numpy as np
 import os
 import json
 import pprint
+import random
+import copy
 
 #put your name here, so each file is different
 CSV_FILENAME = 'MovieGenre'
@@ -39,6 +41,7 @@ def main():
     genre_labels = json.load(open('./data/genreLabels.json'))
     count = {}
     genre_data = {}
+    single_data = {}
     NUM_CLASSES = 6
     # accepting_labels = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
     accepting_labels = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
@@ -64,6 +67,19 @@ def main():
             label_vector = [1.0 if label in movie_genres else 0.0 for label in accepting_labels]
             if label_vector != [0,0,0,0,0,0]:
                 genre_data[imdbId] = label_vector
+                temp_labels = copy.deepcopy(label_vector)
+                one_indices = [i for i, val in enumerate(temp_labels) if val == 1]
+    
+                if one_indices:
+                    # Choose a random index from one_indices
+                    random_index = random.choice(one_indices)
+
+                    # Set all indices with 1 to 0, except the randomly chosen index
+                    for i in range(len(temp_labels)):
+                        if i != random_index:
+                            temp_labels[i] = 0
+                single_data[imdbId] = temp_labels
+                
                 i+=1
             
             # label_vector = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
@@ -77,6 +93,8 @@ def main():
     pprint.pp(dict(sorted(count.items(), key=lambda item: item[1])))
     with open('./new_data/Top6GenreData.json', 'w') as f:
         json.dump(genre_data, f)
+    with open('./new_data/SingleGenreData.json', 'w') as f:
+        json.dump(single_data, f)
 
 if __name__ == "__main__":
     main()
