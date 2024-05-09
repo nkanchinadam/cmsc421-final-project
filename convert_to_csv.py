@@ -3,7 +3,7 @@ import json
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-genre_data = json.load(open('./new_data/Top5GenreData.json', 'r'))
+genre_data = json.load(open('./new_data/Top6GenreData.json', 'r'))
 file_path = []
 classes = []
 count = 0

@@ -217,14 +217,14 @@ model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
 for param in model.parameters():
     param.requires_grad = False
 
-#model.fc = nn.Linear(512, 5)
-model.fc = nn.Linear(1024, 5)
+#model.fc = nn.Linear(512, 6)
+model.fc = nn.Linear(1024, 6)
 summary(model, input_size=(1, 3, 224, 224))
 
 epochs=4
 batch_size=64
 learning_rate = 0.1
-label_name = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
+label_name = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 train_loader, valid_loader = get_data(batch_size=batch_size)
