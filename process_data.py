@@ -39,21 +39,32 @@ def main():
     genre_labels = json.load(open('./data/genreLabels.json'))
     count = {}
     genre_data = {}
-    NUM_CLASSES = 5
-    accepting_labels = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
+    NUM_CLASSES = 6
+    # accepting_labels = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
+    accepting_labels = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
     
     for label in genre_labels:
         count[label] = 0
 
     i = 0
     for imdbId in df['imdbId']:
-        i += 1
+        # i += 1
         row = df[df['imdbId'] == imdbId]
         if get_image_filedir(imdbId):
             movie_genres = row['Genre'].values[0].split('|')
             
+            bool = False
+            for genre in movie_genres:
+                if count[genre] > 2850:
+                    bool = True
+                    break
+            if bool:
+                continue
+            
             label_vector = [1.0 if label in movie_genres else 0.0 for label in accepting_labels]
-            genre_data[imdbId] = label_vector
+            if label_vector != [0,0,0,0,0,0]:
+                genre_data[imdbId] = label_vector
+                i+=1
             
             # label_vector = [1.0 if label in movie_genres else 0.0 for label in genre_labels]
             # if label_vector.count(0.0) == len(genre_labels) - 1:
@@ -64,7 +75,7 @@ def main():
                 
     print("number of distict posters:", i)
     pprint.pp(dict(sorted(count.items(), key=lambda item: item[1])))
-    with open('./new_data/Top5GenreData.json', 'w') as f:
+    with open('./new_data/Top6GenreData.json', 'w') as f:
         json.dump(genre_data, f)
 
 if __name__ == "__main__":
