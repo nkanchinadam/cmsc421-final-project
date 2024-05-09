@@ -138,7 +138,9 @@ def train(model, trainloader, optimizer, criterion, device):
             total_outputs.append(output)
             output = torch.tensor(output)
             train_total_count += 1
-            if torch.all(torch.eq(output, label)):
+            # if torch.all(torch.eq(output, label)):
+            #     train_running_count += 1
+            if label[np.argmax(output)] == 1:
                 train_running_count += 1
 
         # Backpropagation
@@ -195,7 +197,9 @@ def validate(model, testloader, criterion, device):
                 total_outputs.append(output)
                 output = torch.tensor(output)
                 total_running_count += 1
-                if torch.all(torch.eq(output, label)):
+                # if torch.all(torch.eq(output, label)):
+                #     valid_running_count += 1
+                if label[np.argmax(output)] == 1:
                     valid_running_count += 1
 
     # Loss and accuracy for the complete epoch.
@@ -217,8 +221,8 @@ for param in model.parameters():
 model.fc = nn.Linear(1024, 5)
 summary(model, input_size=(1, 3, 224, 224))
 
-epochs=2
-batch_size=32
+epochs=4
+batch_size=64
 learning_rate = 0.1
 label_name = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -269,6 +273,9 @@ plt.plot(valid_loss)
 plt.show()
 plt.plot(train_f1)
 plt.plot(valid_f1)
+plt.show()
+plt.plot(train_acc)
+plt.plot(valid_acc)
 plt.show()
 print('TRAINING COMPLETE')
 
