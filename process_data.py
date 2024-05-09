@@ -42,12 +42,14 @@ def main():
     count = {}
     genre_data = {}
     single_data = {}
+    single_count = {}
     NUM_CLASSES = 6
     # accepting_labels = ['Crime', 'Action', 'Romance', 'Comedy', 'Drama']
     accepting_labels = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
     
     for label in genre_labels:
         count[label] = 0
+        single_count[label] = 0
 
     i = 0
     for imdbId in df['imdbId']:
@@ -78,6 +80,7 @@ def main():
                     for i in range(len(temp_labels)):
                         if i != random_index:
                             temp_labels[i] = 0
+                    single_count[accepting_labels[random_index]] += 1
                 single_data[imdbId] = temp_labels
                 
                 i+=1
@@ -88,9 +91,12 @@ def main():
             
             for genre in movie_genres:
                 count[genre] += 1
+            
                 
     print("number of distict posters:", i)
     pprint.pp(dict(sorted(count.items(), key=lambda item: item[1])))
+    print("********************************************************")
+    pprint.pp(dict(sorted(single_count.items(), key=lambda item: item[1])))
     with open('./new_data/Top6GenreData.json', 'w') as f:
         json.dump(genre_data, f)
     with open('./new_data/SingleGenreData.json', 'w') as f:
