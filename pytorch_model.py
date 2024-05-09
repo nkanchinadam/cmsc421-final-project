@@ -221,7 +221,7 @@ for param in model.parameters():
 model.fc = nn.Linear(1024, 6)
 summary(model, input_size=(1, 3, 224, 224))
 
-epochs=4
+epochs=20
 batch_size=64
 learning_rate = 0.1
 label_name = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
@@ -265,17 +265,24 @@ for epoch in range(epochs):
     print(f"Validation loss: {valid_epoch_loss:.3f}, Validation acc: {valid_epoch_acc:.3f}, Validation F1 Score: {valid_epoch_f1:.3f}")
     
     print('-'*50)
-    
+
+# torch.save(model.state_dict(), "./ResNetModel.pt")    
 torch.save(model.state_dict(), "./GoogleNetModel.pt")
 # Save the loss and accuracy plots.
 plt.plot(train_loss)
 plt.plot(valid_loss)
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
 plt.show()
 plt.plot(train_f1)
 plt.plot(valid_f1)
+plt.xlabel('Epochs')
+plt.ylabel('F1 Score')
 plt.show()
 plt.plot(train_acc)
 plt.plot(valid_acc)
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
 plt.show()
 print('TRAINING COMPLETE')
 
