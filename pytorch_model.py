@@ -211,19 +211,24 @@ def validate(model, testloader, criterion, device):
 
 
 # Pre-trained resnet that we will freeze
-#model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
-model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
+model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+#model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
 
 for param in model.parameters():
     param.requires_grad = False
 
-#model.fc = nn.Linear(512, 6)
-model.fc = nn.Linear(1024, 6)
+model.fc = nn.Sequential(
+    nn.Linear(512, 216),
+    nn.ReLU(),
+    nn.Linear(216, 6)
+    )
+
+#model.fc = nn.Linear(1024, 6)
 summary(model, input_size=(1, 3, 224, 224))
 
-epochs=20
-batch_size=64
-learning_rate = 0.1
+epochs=10
+batch_size=32
+learning_rate = 0.01
 label_name = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -265,8 +270,7 @@ for epoch in range(epochs):
     print(f"Validation loss: {valid_epoch_loss:.3f}, Validation acc: {valid_epoch_acc:.3f}, Validation F1 Score: {valid_epoch_f1:.3f}")
     
     print('-'*50)
-
-# torch.save(model.state_dict(), "./ResNetModel.pt")    
+    
 torch.save(model.state_dict(), "./GoogleNetModel.pt")
 # Save the loss and accuracy plots.
 plt.plot(train_loss)
