@@ -119,6 +119,12 @@ def train(model, trainloader, optimizer, criterion, device):
         optimizer.zero_grad()
         # Forward pass.
         outputs = model(image)
+        threshold = 0.25
+        for i in range(len(outputs)):
+            if outputs[i] > threshold:
+                outputs[i] = 1
+            else:
+                outputs[i] = 0
         # Calculate loss
         loss = criterion(outputs, labels)
         train_running_loss += loss.item()
@@ -179,6 +185,12 @@ def validate(model, testloader, criterion, device):
             labels = torch.tensor(labels)
             # Forward pass.
             outputs = model(image)
+            threshold = 0.25
+            for i in range(len(outputs)):
+                if outputs[i] > threshold:
+                    outputs[i] = 1
+                else:
+                    outputs[i] = 0
             # Calculate the loss.
             loss = criterion(outputs, labels)
             valid_running_loss += loss.item()
@@ -220,7 +232,8 @@ for param in model.parameters():
 model.fc = nn.Sequential(
     nn.Linear(512, 216),
     nn.ReLU(),
-    nn.Linear(216, 6)
+    nn.Linear(216, 6),
+    nn.Softmax()
     )
 
 #model.fc = nn.Linear(1024, 6)
@@ -237,7 +250,8 @@ train_loader, valid_loader = get_data(batch_size=batch_size)
 # Optimizer.
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
-criterion = nn.BCEWithLogitsLoss()
+# criterion = nn.BCEWithLogitsLoss()
+criterion = nn.CrossEntropyLoss()
 
 # Lists to keep track of losses and accuracies.
 train_loss, valid_loss = [], []
