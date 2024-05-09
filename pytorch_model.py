@@ -24,8 +24,9 @@ val_path = "./PathAndClassVal.csv"
 # define the image transformations 
 IMAGE_SIZE = 224
 data_transform = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)), 
-                                     transforms.RandomHorizontalFlip(p=0.5),
-                                     transforms.RandomRotation(degrees=45),
+                                     transforms.RandomHorizontalFlip(p=0.3),
+                                     transforms.RandomVerticalFlip(p=0.3),
+                                     transforms.RandomRotation(degrees=10),
                                      transforms.ToTensor()])
 data_transform_val = transforms.Compose([transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
                                          transforms.ToTensor()])
@@ -119,12 +120,6 @@ def train(model, trainloader, optimizer, criterion, device):
         optimizer.zero_grad()
         # Forward pass.
         outputs = model(image)
-        threshold = 0.25
-        for i in range(len(outputs)):
-            if outputs[i] > threshold:
-                outputs[i] = 1
-            else:
-                outputs[i] = 0
         # Calculate loss
         loss = criterion(outputs, labels)
         train_running_loss += loss.item()
@@ -134,20 +129,30 @@ def train(model, trainloader, optimizer, criterion, device):
         
         #for i in range(len(outputs.data)):
             #metric.update(outputs.data[i, :], labels[i, :])
-        
 
         # Accuracy + F1 Score
         for i in range(len(outputs.data)):
             output = outputs.data[i, :]
             label = labels[i,:]
-            output = [1.0 if o >= 0 else 0.0 for o in output]
-            total_outputs.append(output)
-            output = torch.tensor(output)
+            ones = 0
+            for dat in label:
+                if dat == 1:
+                    ones += 1
+            pred = [0.0] * 6
+            output = output.tolist()
+            while ones > 0:
+                ind = output.index(max(output))
+                pred[ind] = 1.0
+                output[ind] = float("-inf")
+                ones -= 1
+
+            total_outputs.append(pred)
+            pred = torch.tensor(pred)
             train_total_count += 1
-            # if torch.all(torch.eq(output, label)):
-            #     train_running_count += 1
-            if label[np.argmax(output)] == 1:
+            if torch.all(torch.eq(pred, label)):
                 train_running_count += 1
+            #if label[np.argmax(output)] == 1:
+                #train_running_count += 1
 
         # Backpropagation
 
@@ -185,12 +190,6 @@ def validate(model, testloader, criterion, device):
             labels = torch.tensor(labels)
             # Forward pass.
             outputs = model(image)
-            threshold = 0.25
-            for i in range(len(outputs)):
-                if outputs[i] > threshold:
-                    outputs[i] = 1
-                else:
-                    outputs[i] = 0
             # Calculate the loss.
             loss = criterion(outputs, labels)
             valid_running_loss += loss.item()
@@ -205,9 +204,20 @@ def validate(model, testloader, criterion, device):
             for i in range(len(outputs.data)):
                 output = outputs.data[i, :]
                 label = labels[i,:]
-                output = [1.0 if o >= 0 else 0.0 for o in output]
-                total_outputs.append(output)
-                output = torch.tensor(output)
+                ones = 0
+                for dat in label:
+                    if dat == 1:
+                        ones += 1
+                pred = [0.0] * 6
+                output = output.tolist()
+                while ones > 0:
+                    ind = output.index(max(output))
+                    pred[ind] = 1.0
+                    output[ind] = float("-inf")
+                    ones -= 1
+
+                total_outputs.append(pred)
+                pred = torch.tensor(pred)
                 total_running_count += 1
                 # if torch.all(torch.eq(output, label)):
                 #     valid_running_count += 1
@@ -230,17 +240,17 @@ for param in model.parameters():
     param.requires_grad = False
 
 model.fc = nn.Sequential(
-    nn.Linear(512, 216),
+    nn.Linear(512, 256),
     nn.ReLU(),
-    nn.Linear(216, 6),
-    nn.Softmax()
+    nn.Linear(256, 6),
+    nn.Sigmoid()
     )
 
 #model.fc = nn.Linear(1024, 6)
 summary(model, input_size=(1, 3, 224, 224))
 
 epochs=10
-batch_size=32
+batch_size=64
 learning_rate = 0.01
 label_name = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -250,8 +260,7 @@ train_loader, valid_loader = get_data(batch_size=batch_size)
 # Optimizer.
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 # Loss function.
-# criterion = nn.BCEWithLogitsLoss()
-criterion = nn.CrossEntropyLoss()
+criterion = nn.BCELoss()
 
 # Lists to keep track of losses and accuracies.
 train_loss, valid_loss = [], []
@@ -285,7 +294,7 @@ for epoch in range(epochs):
     
     print('-'*50)
     
-torch.save(model.state_dict(), "./GoogleNetModel.pt")
+torch.save(model.state_dict(), "./ResNetModel.pt")
 # Save the loss and accuracy plots.
 plt.plot(train_loss)
 plt.plot(valid_loss)
