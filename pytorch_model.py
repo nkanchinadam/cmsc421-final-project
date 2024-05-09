@@ -266,7 +266,7 @@ for epoch in range(epochs):
     
     print('-'*50)
     
-torch.save(model.state_dict(), "./ResNetModel.pt")
+torch.save(model.state_dict(), "./GoogleNetModel.pt")
 # Save the loss and accuracy plots.
 plt.plot(train_loss)
 plt.plot(valid_loss)
