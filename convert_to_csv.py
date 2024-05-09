@@ -3,7 +3,7 @@ import json
 from sklearn.model_selection import train_test_split
 from PIL import Image
 
-genre_data = json.load(open('./new_data/Top6GenreData.json', 'r'))
+genre_data = json.load(open('./new_data/SingleGenreData.json', 'r'))
 file_path = []
 classes = []
 count = 0
@@ -11,9 +11,10 @@ for id in genre_data.keys():
   count += 1
   print(count)
   try:
-    Image.open('./images/' + id + '.png').convert('RGB').save("./images/" + id + ".png", )
-    file_path.append("./images/" + id + ".png")
-    classes.append(genre_data[id])
+    if(genre_data[id] == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
+      Image.open('./images/' + id + '.png').convert('RGB').save("./images/" + id + ".png", )
+      file_path.append("./images/" + id + ".png")
+      classes.append(genre_data[id])
   except:
     continue
 
@@ -25,6 +26,6 @@ file_path_train, file_path_val, classes_train, classes_val = train_test_split(fi
 df1 = pd.DataFrame(data={"path": file_path_train, "label": classes_train})
 df2 = pd.DataFrame(data={"path": file_path_val, "label": classes_val})
 df3 = pd.DataFrame(data={"path": file_path_test, "label": classes_test})
-df1.to_csv("PathAndClassTrain.csv")
-df2.to_csv("PathAndClassVal.csv")
-df3.to_csv("PathAndClassTest.csv")
+df1.to_csv("SinglePathAndClassTrain1.csv")
+df2.to_csv("SinglePathAndClassVal1.csv")
+df3.to_csv("SinglePathAndClassTest1.csv")
