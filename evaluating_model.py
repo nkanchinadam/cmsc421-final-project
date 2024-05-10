@@ -30,11 +30,16 @@ class CustomDataSet(Dataset):
             image = self.transform(image)
         return image, label
 
-# model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
-model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
+model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
+#model = torchvision.models.googlenet(weights='IMAGENET1K_V1')
 names = ['Drama', 'Documentary', 'Comedy', 'Action', 'Thriller', 'Horror']
 #model.fc = nn.Linear(512, 6)
-model.fc = nn.Linear(1024, 6)
+model.fc = nn.Sequential(
+    nn.Linear(512, 256),
+    nn.ReLU(),
+    nn.Linear(256, 6),
+    nn.Sigmoid()
+    )
 # model.load_state_dict(torch.load('./ResNetModel.pt'))
 model.load_state_dict(torch.load('./GoogleNetModel.pt'))
 
@@ -50,20 +55,28 @@ for i, data in tqdm(enumerate(test_loader), total=len(test_loader)):
   image, labels = data 
   labels = [[float(val) for val in label[1:-1].split(', ')] for label in labels][0]
   outputs = model(image)
-  outputs = [0.0 if data < 0 else 1.0 for data in outputs.data[0, :]]
+  output = outputs[0, :].tolist()
+  ones = 0
+  for dat in labels:
+      if dat == 1:
+          ones += 1
+  pred = [0.0] * 6
+  while ones > 0:
+      ind = output.index(max(output))
+      pred[ind] = 1.0
+      output[ind] = float("-inf")
+      ones -= 1
 
-  for ind in range(len(outputs)):
-    if outputs[ind] == labels[ind]:
-      if outputs[ind] == 1:
+  for ind in range(len(pred)):
+    if pred[ind] == labels[ind]:
+      if pred[ind] == 1:
         metric[ind][0] += 1
       else:
         metric[ind][2] += 1
-    elif outputs[ind] == 1:
+    elif pred[ind] == 1:
       metric[ind][1] += 1
     else:
       metric[ind][3] += 1
-  if counter == 500:
-    break
     
 print(metric)
 for ind in range(len(metric)):
