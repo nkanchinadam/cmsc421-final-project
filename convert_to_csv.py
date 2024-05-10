@@ -11,10 +11,9 @@ for id in genre_data.keys():
   count += 1
   print(count)
   try:
-    if(genre_data[id] == [1.0, 0.0, 0.0, 0.0, 0.0, 0.0]):
-      Image.open('./images/' + id + '.png').convert('RGB').save("./images/" + id + ".png", )
-      file_path.append("./images/" + id + ".png")
-      classes.append(genre_data[id])
+    Image.open('./images/' + id + '.png').convert('RGB').save("./images/" + id + ".png", )
+    file_path.append("./images/" + id + ".png")
+    classes.append(genre_data[id])
   except:
     continue
 
